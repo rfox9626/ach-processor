@@ -1,6 +1,7 @@
-from ach.nacha.layouts import ACH_FIELDS, RECORD_LENGTH
-from ach.nacha.parser import parse_file, AchFormatError
 from pathlib import Path
+
+from ach.nacha.layouts import ACH_FIELDS, RECORD_LENGTH
+
 FIXTURES = Path(__file__).parent / "fixtures"
 
 def test_layouts_cover_every_character_without_gaps():

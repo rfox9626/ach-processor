@@ -1,0 +1,10 @@
+[tool.ruff]
+line-length = 100
+extend-exclude = ["*/migrations/*"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]   # errors, pyflakes, import order, common bugs
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "ach_processor.settings"
+python_files = ["test_*.py", "tests.py"]

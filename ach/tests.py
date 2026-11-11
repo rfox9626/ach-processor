@@ -1,4 +1,3 @@
-from django.test import TestCase
 import pytest
 
 from ach_processor.celery import ping
