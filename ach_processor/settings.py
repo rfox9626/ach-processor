@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ar-xvi9*@ff)rrqkma6zc)m9-ys4r=b#5x0uu34-9e-70+k%+#'
+SECRET_KEY = os.environ.get("SECRET_KEY", "dev-only-not-secret")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -76,9 +76,9 @@ WSGI_APPLICATION = 'ach_processor.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ["POSTGRES_DB"],
-        "USER": os.environ["POSTGRES_USER"],
-        "PASSWORD": os.environ["POSTGRES_PASSWORD"],
+        "NAME": os.environ.get("POSTGRES_DB", "ach"),
+        "USER": os.environ.get("POSTGRES_USER", "ach"),
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "ach_dev_pw"),
         "HOST": os.environ.get("POSTGRES_HOST", "localhost"),
         "PORT": os.environ.get("POSTGRES_PORT", "5432"),
     }
