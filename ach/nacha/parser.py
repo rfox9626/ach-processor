@@ -43,9 +43,7 @@ def parse_file(path):
                 continue
 
             fields = ACH_FIELDS[code]
-            entry = {
-                name: line[start:end].strip() for name, (start, end) in fields.items()
-            }
+            entry = {name: line[start:end].strip() for name, (start, end) in fields.items()}
 
             if code == "1":
                 file_header = entry
@@ -78,14 +76,10 @@ def parse_file(path):
                 prev = batch["entries"][-1]
 
                 if prev["addenda_flag"] != "1":
-                    raise AchFormatError(
-                        index, "addenda for an entry whose addenda flag is 0"
-                    )
+                    raise AchFormatError(index, "addenda for an entry whose addenda flag is 0")
 
                 if entry["entry_seq"] != prev["trace_number"][-7:]:
-                    raise AchFormatError(
-                        index, "addenda sequence doesn't match its entry"
-                    )
+                    raise AchFormatError(index, "addenda sequence doesn't match its entry")
 
                 prev["addenda_type"] = entry["addenda_type"]
                 prev["addenda_info"] = entry["payment_info"]
@@ -148,9 +142,7 @@ def parse_file(path):
         if not seen_nine:
             raise AchFormatError(index, "file has no file control (9) record")
         elif in_batch:
-            raise AchFormatError(
-                index, "file ended with a batch still open (missing 8)"
-            )
+            raise AchFormatError(index, "file ended with a batch still open (missing 8)")
         elif index % 10 != 0:
             raise AchFormatError(index, f"file has {index} lines, not a multiple of 10")
 

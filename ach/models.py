@@ -33,6 +33,7 @@ class Entry(models.Model):
     def __str__(self):
         return f"{self.trace_number} - {self.amount_cents}"
 
+
 class Batch(models.Model):
     class Status(models.TextChoices):
         PENDING = "PENDING", "Pending"
@@ -40,11 +41,7 @@ class Batch(models.Model):
         INVALID = "INVALID", "Invalid"
         RECEIVED = "RECEIVED", "Received"
 
-    ach_file = models.ForeignKey(
-        "AchFile",
-        on_delete=models.CASCADE,
-        related_name="batches"
-    )
+    ach_file = models.ForeignKey("AchFile", on_delete=models.CASCADE, related_name="batches")
 
     batch_number = models.IntegerField()
     service_class = models.CharField(max_length=3)
@@ -62,13 +59,14 @@ class Batch(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["ach_file", "batch_number"], 
-                name="batch_number_unique_per_file"),
+                fields=["ach_file", "batch_number"], name="batch_number_unique_per_file"
+            ),
         ]
         verbose_name_plural = "batches"
 
     def __str__(self):
         return f"{self.company_name} - Batch {self.batch_number}"
+
 
 class AchFile(models.Model):
     class Status(models.TextChoices):

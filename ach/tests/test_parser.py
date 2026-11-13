@@ -2,10 +2,10 @@ from pathlib import Path
 
 import pytest
 
+from ach.models import AchFile
 from ach.nacha.layouts import ACH_FIELDS, RECORD_LENGTH
 from ach.nacha.parser import AchFormatError, parse_file
 from ach.services import ingest_file
-from ach.models import AchFile, Batch, Entry
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -32,8 +32,9 @@ def test_sample_file_parses():
     assert len(batches[0]["entries"]) == 3
     assert len(batches[1]["entries"]) == 2
 
+
 @pytest.mark.django_db
 def test_ingest_sample_file():
     ach_file = ingest_file(FIXTURES / "sample.ach")
-
+    assert ach_file.batches.count() == 2
     assert AchFile.objects.count() == 1
