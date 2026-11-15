@@ -40,11 +40,28 @@ services:
         condition: service_started
       migrate:
         condition: service_completed_successfully
+  beat:
+    container_name: beat
+    command: celery -A ach_processor beat -l info
+    env_file: .env
+    build: .
+    user: "1000:1000"
+    volumes:
+      - .:/app
+      - ./data:/data/ach
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      migrate:
+        condition: service_completed_successfully
   celery:
     container_name: celery
     build: .
     volumes:
       - .:/app
+      - ./data:/data/ach
     command: celery -A ach_processor worker -l INFO
     env_file: .env
     depends_on:

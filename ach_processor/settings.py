@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "ach",
+    "django_celery_beat",
 ]
 
 MIDDLEWARE = [
@@ -86,7 +87,18 @@ DATABASES = {
 
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/1")
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+ACH_DATA_DIR = Path(os.environ.get("ACH_DATA_DIR", "/data/ach"))
+ACH_INCOMING_DIR = ACH_DATA_DIR / "incoming"
+ACH_PROCESSING_DIR = ACH_INCOMING_DIR / "processing"
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+CELERY_BEAT_SCHEDULE = {
+    "scan_incoming": {
+        "task": "ach.tasks.scan_incoming",
+        "schedule": 60.0,
+    },
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators

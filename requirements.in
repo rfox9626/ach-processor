@@ -1,0 +1,7 @@
+Django>=5.2,<5.3
+celery[redis]>=5.4,<6
+django-celery-beat==2.9.0
+redis
+psycopg[binary]
+flower
+packaging
