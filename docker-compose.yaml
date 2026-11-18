@@ -33,6 +33,7 @@ services:
     env_file: .env
     volumes:
       - .:/app
+      - ./data:/data/ach
     depends_on:
       postgres:
         condition: service_healthy

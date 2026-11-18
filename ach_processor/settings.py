@@ -92,6 +92,8 @@ ACH_DATA_DIR = Path(os.environ.get("ACH_DATA_DIR", "/data/ach"))
 ACH_INCOMING_DIR = ACH_DATA_DIR / "incoming"
 ACH_PROCESSING_DIR = ACH_INCOMING_DIR / "processing"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+ACH_BANK_ROUTING = "076401251"
+ACH_BANK_NAME = "FIRST DEMO BANK"
 
 CELERY_BEAT_SCHEDULE = {
     "scan_incoming": {

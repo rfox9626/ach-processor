@@ -20,9 +20,20 @@ def yymmdd(s):
     return datetime.strptime(s, "%y%m%d").date()
 
 
+def is_debit(code: str) -> bool:
+    return code[1] in "78"
+
+
 def ingest_file(path):
     digest = sha256_of(path)
     header, batches = parse_file(path)
+    
+    batch_cnt = tot_debit = tot_credit = 0
+
+    batch_cnt = len(batches)
+    for b in batches:
+        tot_debit = sum([int(e["amount"]) for e in b["entries"] if is_debit(e["transaction_code"])])
+        tot_credit = sum([int(e["amount"]) for e in b["entries"] if not is_debit(e["transaction_code"])])
 
     with transaction.atomic():
         ach_file = AchFile.objects.create(
@@ -35,6 +46,10 @@ def ingest_file(path):
             creation_date=yymmdd(header["create_date"]),
             creation_time=header["create_time"],
             id_modifier=header["id_modifier"],
+            batch_count = batch_cnt,
+            total_debit_cents = tot_debit,
+            total_credit_cents = tot_credit,
+            status = AchFile.Status.PARSED
         )
 
         for b in batches:
@@ -55,6 +70,7 @@ def ingest_file(path):
             for e in b["entries"]:
                 rows.append(
                     Entry(
+                        ach_file=ach_file,
                         batch=batch,
                         transaction_code=e["transaction_code"],
                         routing_number=e["routing_number"] + e["check_digit"],

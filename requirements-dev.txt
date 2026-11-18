@@ -10,6 +10,8 @@ click==8.5.0
     # via
     #   -c requirements.txt
     #   pip-tools
+faker==40.54.0
+    # via -r requirements-dev.in
 iniconfig==2.3.1
     # via pytest
 packaging==26.3

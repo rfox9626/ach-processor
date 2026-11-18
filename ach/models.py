@@ -8,6 +8,10 @@ class Entry(models.Model):
         INVALID = "INVALID", "Invalid"
         RECEIVED = "RECEIVED", "Received"
 
+    ach_file = models.ForeignKey(
+        "AchFile", on_delete=models.CASCADE, related_name="entries"
+    )
+
     batch = models.ForeignKey("Batch", on_delete=models.CASCADE, related_name="entries")
     transaction_code = models.CharField(max_length=2)
     routing_number = models.CharField(max_length=9)
@@ -15,7 +19,7 @@ class Entry(models.Model):
     amount_cents = models.BigIntegerField()
     individual_id = models.CharField(max_length=15, blank=True)
     individual_name = models.CharField(max_length=22)
-    trace_number = models.CharField(max_length=15, unique=True)
+    trace_number = models.CharField(max_length=15)
     addenda_type = models.CharField(max_length=2, blank=True)
     addenda_info = models.CharField(max_length=80, blank=True)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
@@ -27,6 +31,10 @@ class Entry(models.Model):
             models.CheckConstraint(
                 condition=models.Q(amount_cents__gte=0),
                 name="entry_amount_non_negative",
+            ),
+            models.UniqueConstraint(                          # ③ NEW: unique within a file
+                fields=["ach_file", "trace_number"],
+                name="trace_number_unique_per_file",
             ),
         ]
 
@@ -74,6 +82,7 @@ class AchFile(models.Model):
         VALID = "VALID", "Valid"
         INVALID = "INVALID", "Invalid"
         RECEIVED = "RECEIVED", "Received"
+        PARSED = "PARSED", "Parsed"
 
     file_name = models.CharField(max_length=255, blank=True)
     sha256 = models.CharField(max_length=64, unique=True)
