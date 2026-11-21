@@ -1,6 +1,51 @@
 from django.db import models
 
 
+class Customer(models.Model):
+    def __str__(self):
+        return self.name
+
+    class CustKind(models.TextChoices):
+        INDIVIDUAL = "INDIVIDUAL", "Individual"
+        BUSINESS = "BUSINESS", "Business"
+
+    name = models.CharField(max_length=100)
+    kind = models.CharField(max_length=10, choices=CustKind.choices)
+
+
+class Account(models.Model):
+    def __str__(self):
+        return f"{self.account_number} ({self.kind}, {self.status})"
+
+    class AccountKind(models.TextChoices):
+        CHECKING = "CHECKING", "Checking"
+        SAVINGS = "SAVINGS", "Savings"
+
+    class AccountStatus(models.TextChoices):
+        OPEN = "OPEN", "Open"
+        CLOSED = "CLOSED", "Closed"
+        FROZEN = "FROZEN", "Frozen"
+
+    customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name="accounts")
+    routing = models.CharField(max_length=9)
+    account_number = models.CharField(max_length=17)
+    kind = models.CharField(max_length=10, choices=AccountKind.choices)
+
+    status = models.CharField(
+        max_length=10, choices=AccountStatus.choices, default=AccountStatus.OPEN
+    )
+
+    balance_cents = models.BigIntegerField(default=0)
+    daily_limit_cents = models.BigIntegerField(default=1_000_000)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["routing", "account_number"], name="account_unique_routing_number"
+            ),
+        ]
+
+
 class Entry(models.Model):
     class Status(models.TextChoices):
         PENDING = "PENDING", "Pending"
@@ -8,9 +53,7 @@ class Entry(models.Model):
         INVALID = "INVALID", "Invalid"
         RECEIVED = "RECEIVED", "Received"
 
-    ach_file = models.ForeignKey(
-        "AchFile", on_delete=models.CASCADE, related_name="entries"
-    )
+    ach_file = models.ForeignKey("AchFile", on_delete=models.CASCADE, related_name="entries")
 
     batch = models.ForeignKey("Batch", on_delete=models.CASCADE, related_name="entries")
     transaction_code = models.CharField(max_length=2)
@@ -24,6 +67,7 @@ class Entry(models.Model):
     addenda_info = models.CharField(max_length=80, blank=True)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     reject_reason = models.TextField(blank=True, default="")
+    return_code = models.CharField(max_length=3, blank=True)
 
     class Meta:
         verbose_name_plural = "entries"
@@ -32,7 +76,7 @@ class Entry(models.Model):
                 condition=models.Q(amount_cents__gte=0),
                 name="entry_amount_non_negative",
             ),
-            models.UniqueConstraint(                          # ③ NEW: unique within a file
+            models.UniqueConstraint(
                 fields=["ach_file", "trace_number"],
                 name="trace_number_unique_per_file",
             ),
@@ -103,3 +147,19 @@ class AchFile(models.Model):
 
     def __str__(self):
         return f"{self.file_name}"
+
+
+class DailyUsage(models.Model):
+    account = models.ForeignKey("Account", on_delete=models.PROTECT)
+    date = models.DateField()
+    used_cents = models.BigIntegerField(default=0)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["account", "date"], name="account_number_unique_per_day"
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.account_id} - {self.date} - {self.used_cents}"

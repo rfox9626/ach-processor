@@ -4,7 +4,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from faker import Faker
 
-from ach.fakes.pool import build_originators, build_receivers, build_relationships
+from ach.fakes.pool import build_pool
 from ach.nacha.writer import build_file, next_business_day
 
 
@@ -16,16 +16,10 @@ class Command(BaseCommand):
         parser.add_argument("--seed", type=int, default=None)
 
     def handle(self, *args, **options):
-        pool_fake = Faker("en_US")
-        pool_fake.seed_instance(42)
-
+        originators, receivers, relationships = build_pool()
         file_fake = Faker("en_US")
         if options["seed"] is not None:
             file_fake.seed_instance(options["seed"])
-
-        originators = build_originators(pool_fake, 6)
-        receivers = build_receivers(pool_fake, 100)
-        relationships = build_relationships(originators, receivers, pool_fake)
 
         orig = next(o for o in originators if o["kind"] == "payroll")
         rels = [r for r in relationships if r["originator"] == orig["id"]][:options["entries"]]

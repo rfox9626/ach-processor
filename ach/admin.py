@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import AchFile, Batch, Entry
+from .models import AchFile, Batch, Entry, Account, Customer
 
 
 class BatchInline(admin.TabularInline):
@@ -42,3 +42,5 @@ class AchFileAdmin(admin.ModelAdmin):
 
 admin.site.register(Batch)
 admin.site.register(Entry)
+admin.site.register(Account)
+admin.site.register(Customer)

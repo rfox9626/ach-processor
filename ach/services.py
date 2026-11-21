@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 
 from django.db import transaction
-
+import pytest
 from .models import AchFile, Batch, Entry
 from .nacha.parser import parse_file
 
@@ -32,8 +32,8 @@ def ingest_file(path):
 
     batch_cnt = len(batches)
     for b in batches:
-        tot_debit = sum([int(e["amount"]) for e in b["entries"] if is_debit(e["transaction_code"])])
-        tot_credit = sum([int(e["amount"]) for e in b["entries"] if not is_debit(e["transaction_code"])])
+        tot_debit += sum([int(e["amount"]) for e in b["entries"] if is_debit(e["transaction_code"])])
+        tot_credit += sum([int(e["amount"]) for e in b["entries"] if not is_debit(e["transaction_code"])])
 
     with transaction.atomic():
         ach_file = AchFile.objects.create(
@@ -54,6 +54,11 @@ def ingest_file(path):
 
         for b in batches:
             h = b["header"]
+            entries = b["entries"]
+            b_debit = sum(int(e["amount"]) for e in entries if is_debit(e["transaction_code"]))
+            b_credit = sum(int(e["amount"]) for e in entries if not is_debit(e["transaction_code"]))
+
+
             batch = Batch.objects.create(
                 ach_file=ach_file,
                 batch_number=int(h["batch_number"]),
@@ -64,6 +69,9 @@ def ingest_file(path):
                 entry_description=h["entry_description"],
                 effective_date=yymmdd(h["effective_date"]),
                 originating_dfi=h["originating_dfi"],
+                entry_count=len(entries),
+                total_debit_cents=b_debit,
+                total_credit_cents=b_credit,
             )
 
             rows = []

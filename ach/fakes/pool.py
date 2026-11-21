@@ -1,4 +1,13 @@
 from django.conf import settings
+from faker import Faker
+
+def build_pool(seed: int = 42):
+    fake = Faker("en_US")
+    fake.seed_instance(seed)
+    originators = build_originators(fake, 6)
+    receivers = build_receivers(fake, 100)
+    relationships = build_relationships(originators, receivers, fake)
+    return originators, receivers, relationships
 
 
 def build_originators(fake, n) -> list[dict]: 
