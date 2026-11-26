@@ -3,12 +3,13 @@ from pathlib import Path
 import pytest
 
 from ach.models import AchFile
+from ach.nacha.fields import check_digit
 from ach.nacha.layouts import ACH_FIELDS, RECORD_LENGTH
 from ach.nacha.parser import AchFormatError, parse_file
 from ach.services import ingest_file
-from ach.nacha.fields import check_digit
 
 FIXTURES = Path(__file__).parent / "fixtures"
+
 
 @pytest.mark.parametrize(
     "routing8, expected",
@@ -19,14 +20,13 @@ FIXTURES = Path(__file__).parent / "fixtures"
         ("04200001", "3"),
     ],
 )
-
 def test_check_digit(routing8, expected):
     assert check_digit(routing8) == expected
 
 
 def test_check_digit_rejects_wrong_length():
     with pytest.raises(ValueError):
-        check_digit("021000021")        # 9 digits: strict=True in zip() makes this fail loudly
+        check_digit("021000021")  # 9 digits: strict=True in zip() makes this fail loudly
 
 
 def test_layouts_cover_every_character_without_gaps():

@@ -10,7 +10,7 @@ def check_routing(routing: str) -> str | None:
     if check == routing[8]:
         return None
 
-    return check
+    return "R28"
 
 
 def check_account(account: Account | None) -> str | None:

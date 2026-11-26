@@ -127,6 +127,7 @@ class AchFile(models.Model):
         INVALID = "INVALID", "Invalid"
         RECEIVED = "RECEIVED", "Received"
         PARSED = "PARSED", "Parsed"
+        CHECKED = "CHECKED", "Checked"
 
     file_name = models.CharField(max_length=255, blank=True)
     sha256 = models.CharField(max_length=64, unique=True)
